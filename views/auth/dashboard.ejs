@@ -9,22 +9,27 @@
         <div>
             <div style="display: flex; align-items: center; margin-bottom: 15px;">
                 <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 50%; margin-right: 20px;">
-                    <span style="font-size: 2em;">🏦</span>
+                    <span style="font-size: 2em;">👋</span>
                 </div>
                 <div>
                     <h1 style="margin: 0; font-size: 2.5em; font-weight: 700;">
-                        Welcome to Finsight<% if (user && user.name) { %>, <%= user.name %>!<% } %>
+                        Welcome back<% if (user && user.name) { %>, <%= user.name %>!<% } %>
                     </h1>
-                    <p style="margin: 10px 0 0 0; font-size: 1.2em; opacity: 0.9;">Your Investment Portfolio Dashboard</p>
+                    <p style="margin: 10px 0 0 0; font-size: 1.2em; opacity: 0.9;">Your Investment Dashboard</p>
                 </div>
             </div>
             <div style="font-size: 1em; opacity: 0.8;">
-                Last login: <%= new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }) %>
+                <span id="currentDate"></span> • <span id="currentTime"></span>
             </div>
         </div>
         
         <div style="text-align: right;">
-            <a href="/demo/logout" style="background: rgba(255,255,255,0.2); color: white; padding: 12px 24px; text-decoration: none; border-radius: 25px; font-size: 1em; backdrop-filter: blur(10px); transition: all 0.2s ease;"
+            <a href="/stocks/market" style="background: rgba(255,255,255,0.2); color: white; padding: 12px 24px; text-decoration: none; border-radius: 25px; font-size: 1em; backdrop-filter: blur(10px); transition: all 0.2s ease; margin-right: 10px; display: inline-block;"
+               onmouseover="this.style.background='rgba(255,255,255,0.3)'; this.style.transform='translateY(-2px)'" 
+               onmouseout="this.style.background='rgba(255,255,255,0.2)'; this.style.transform='translateY(0)'">
+                📊 Stock Market
+            </a>
+            <a href="/demo/logout" style="background: rgba(255,255,255,0.2); color: white; padding: 12px 24px; text-decoration: none; border-radius: 25px; font-size: 1em; backdrop-filter: blur(10px); transition: all 0.2s ease; display: inline-block;"
                onmouseover="this.style.background='rgba(255,255,255,0.3)'; this.style.transform='translateY(-2px)'" 
                onmouseout="this.style.background='rgba(255,255,255,0.2)'; this.style.transform='translateY(0)'">
                 🚪 Logout
@@ -46,75 +51,129 @@
     </div>
 <% } %>
 
-<!-- Quick Stats -->
-<% if (portfolios && portfolios.length > 0) { %>
+<!-- Quick Stats Overview -->
+<% 
+let totalPortfolios = portfolios.length;
+let activeAlerts = 0;
+let totalTransactions = 0;
+
+// These would be calculated from actual data
+%>
+
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; margin-bottom: 40px;">
     
     <!-- Total Portfolios -->
-    <div style="background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); color: white; padding: 25px; border-radius: 16px; position: relative; overflow: hidden; box-shadow: 0 8px 32px rgba(76, 175, 80, 0.3);">
+    <div style="background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); color: white; padding: 30px; border-radius: 16px; position: relative; overflow: hidden; box-shadow: 0 8px 32px rgba(76, 175, 80, 0.3); cursor: pointer; transition: transform 0.2s;"
+         onclick="window.location.href='#portfolios-section'"
+         onmouseover="this.style.transform='translateY(-5px)'" 
+         onmouseout="this.style.transform='translateY(0)'">
         <div style="position: absolute; top: -10px; right: -10px; width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 50%;"></div>
         <div style="display: flex; align-items: center; margin-bottom: 15px;">
-            <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 50%; margin-right: 15px;">
-                <span style="font-size: 1.3em;">📊</span>
+            <div style="background: rgba(255,255,255,0.2); padding: 12px; border-radius: 50%; margin-right: 15px;">
+                <span style="font-size: 1.5em;">📊</span>
             </div>
             <div>
                 <div style="font-size: 0.9em; opacity: 0.9;">Active Portfolios</div>
-                <div style="font-size: 2em; font-weight: bold; margin-top: 5px;"><%= portfolios.length %></div>
+                <div style="font-size: 2.5em; font-weight: bold; margin-top: 5px; line-height: 1;"><%= totalPortfolios %></div>
             </div>
         </div>
         <div style="font-size: 0.9em; opacity: 0.9;">Investment accounts</div>
     </div>
 
-    <!-- Latest Activity -->
-    <div style="background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%); color: white; padding: 25px; border-radius: 16px; position: relative; overflow: hidden; box-shadow: 0 8px 32px rgba(33, 150, 243, 0.3);">
+    <!-- Total Value (Placeholder) -->
+    <div style="background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%); color: white; padding: 30px; border-radius: 16px; position: relative; overflow: hidden; box-shadow: 0 8px 32px rgba(33, 150, 243, 0.3); cursor: pointer; transition: transform 0.2s;"
+         onclick="window.location.href='#portfolios-section'"
+         onmouseover="this.style.transform='translateY(-5px)'" 
+         onmouseout="this.style.transform='translateY(0)'">
         <div style="position: absolute; top: -10px; right: -10px; width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 50%;"></div>
         <div style="display: flex; align-items: center; margin-bottom: 15px;">
-            <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 50%; margin-right: 15px;">
-                <span style="font-size: 1.3em;">⏱️</span>
+            <div style="background: rgba(255,255,255,0.2); padding: 12px; border-radius: 50%; margin-right: 15px;">
+                <span style="font-size: 1.5em;">💰</span>
             </div>
             <div>
-                <div style="font-size: 0.9em; opacity: 0.9;">Latest Portfolio</div>
-                <div style="font-size: 1.3em; font-weight: bold; margin-top: 5px;">
-                    <%= portfolios[portfolios.length - 1].name.length > 15 ? 
-                        portfolios[portfolios.length - 1].name.substring(0, 15) + '...' : 
-                        portfolios[portfolios.length - 1].name %>
-                </div>
+                <div style="font-size: 0.9em; opacity: 0.9;">Total Portfolio Value</div>
+                <div style="font-size: 2em; font-weight: bold; margin-top: 5px; line-height: 1;" id="totalValue">$0.00</div>
             </div>
         </div>
-        <div style="font-size: 0.9em; opacity: 0.9;">
-            Created <%= portfolios[portfolios.length - 1].createdAt.toLocaleDateString() %>
-        </div>
+        <div style="font-size: 0.9em; opacity: 0.9;">Across all portfolios</div>
     </div>
 
-    <!-- Quick Action -->
-    <div style="background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%); color: white; padding: 25px; border-radius: 16px; position: relative; overflow: hidden; box-shadow: 0 8px 32px rgba(255, 152, 0, 0.3); cursor: pointer;"
-         onclick="window.location.href='/demo/portfolio/create'"
-         onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 12px 40px rgba(255, 152, 0, 0.4)'"
-         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 32px rgba(255, 152, 0, 0.3)'">
+    <!-- Quick Action - Stock Market -->
+    <div style="background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%); color: white; padding: 30px; border-radius: 16px; position: relative; overflow: hidden; box-shadow: 0 8px 32px rgba(255, 152, 0, 0.3); cursor: pointer; transition: transform 0.2s;"
+         onclick="window.location.href='/stocks/market'"
+         onmouseover="this.style.transform='translateY(-5px)'" 
+         onmouseout="this.style.transform='translateY(0)'">
         <div style="position: absolute; top: -10px; right: -10px; width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 50%;"></div>
         <div style="display: flex; align-items: center; margin-bottom: 15px;">
-            <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 50%; margin-right: 15px;">
-                <span style="font-size: 1.3em;">➕</span>
+            <div style="background: rgba(255,255,255,0.2); padding: 12px; border-radius: 50%; margin-right: 15px;">
+                <span style="font-size: 1.5em;">🌐</span>
+            </div>
+            <div>
+                <div style="font-size: 0.9em; opacity: 0.9;">Stock Market</div>
+                <div style="font-size: 1.8em; font-weight: bold; margin-top: 5px; line-height: 1;">Browse Stocks</div>
+            </div>
+        </div>
+        <div style="font-size: 0.9em; opacity: 0.9;">View and trade stocks</div>
+    </div>
+
+    <!-- Quick Action - Create Portfolio -->
+    <div style="background: linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%); color: white; padding: 30px; border-radius: 16px; position: relative; overflow: hidden; box-shadow: 0 8px 32px rgba(156, 39, 176, 0.3); cursor: pointer; transition: transform 0.2s;"
+         onclick="window.location.href='/demo/portfolio/create'"
+         onmouseover="this.style.transform='translateY(-5px)'" 
+         onmouseout="this.style.transform='translateY(0)'">
+        <div style="position: absolute; top: -10px; right: -10px; width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 50%;"></div>
+        <div style="display: flex; align-items: center; margin-bottom: 15px;">
+            <div style="background: rgba(255,255,255,0.2); padding: 12px; border-radius: 50%; margin-right: 15px;">
+                <span style="font-size: 1.5em;">➕</span>
             </div>
             <div>
                 <div style="font-size: 0.9em; opacity: 0.9;">Quick Action</div>
-                <div style="font-size: 1.3em; font-weight: bold; margin-top: 5px;">New Portfolio</div>
+                <div style="font-size: 1.8em; font-weight: bold; margin-top: 5px; line-height: 1;">New Portfolio</div>
             </div>
         </div>
-        <div style="font-size: 0.9em; opacity: 0.9;">Click to create</div>
+        <div style="font-size: 0.9em; opacity: 0.9;">Create new portfolio</div>
     </div>
 </div>
-<% } %>
+
+<!-- Market Overview (Live Stocks) -->
+<div style="background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 40px;">
+    <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 25px; border-bottom: 1px solid #e0e0e0;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h3 style="margin: 0; color: #2c3e50; display: flex; align-items: center;">
+                    <span style="margin-right: 12px;">📈</span>
+                    Market Overview
+                    <span style="background: #4CAF50; color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.7em; margin-left: 15px; animation: pulse 2s infinite;">
+                        LIVE
+                    </span>
+                </h3>
+                <p style="margin: 5px 0 0 0; color: #666; font-size: 0.95em;">Top performing stocks</p>
+            </div>
+            <a href="/stocks/market" style="background: #2196F3; color: white; padding: 10px 20px; text-decoration: none; border-radius: 8px; font-weight: 600; transition: background 0.2s;"
+               onmouseover="this.style.background='#1976D2'" 
+               onmouseout="this.style.background='#2196F3'">
+                View All Stocks →
+            </a>
+        </div>
+    </div>
+    
+    <div id="marketOverview" style="padding: 25px;">
+        <div style="text-align: center; padding: 40px;">
+            <div style="font-size: 2em; margin-bottom: 10px;">⏳</div>
+            <div style="color: #666;">Loading market data...</div>
+        </div>
+    </div>
+</div>
 
 <!-- Portfolios Section -->
-<div style="background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 40px;">
+<div id="portfolios-section" style="background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 40px;">
     
     <!-- Section Header -->
     <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 30px; border-bottom: 1px solid #e0e0e0;">
         <div style="display: flex; justify-content: space-between; align-items: center;">
             <div>
                 <h2 style="margin: 0 0 8px 0; color: #2c3e50; display: flex; align-items: center;">
-                    <span style="margin-right: 12px;">📈</span>
+                    <span style="margin-right: 12px;">💼</span>
                     Your Investment Portfolios
                     <span style="background: #2196F3; color: white; padding: 6px 12px; border-radius: 12px; font-size: 0.7em; margin-left: 15px;">
                         <%= portfolios.length %> Active
@@ -139,7 +198,8 @@
             <!-- Portfolio Grid -->
             <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 25px;">
                 <% portfolios.forEach((p, index) => { %>
-                    <div style="border: 2px solid #e0e0e0; border-radius: 16px; padding: 25px; transition: all 0.3s ease; position: relative; background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%); cursor: pointer;"
+                    <div class="portfolio-card" data-portfolio-id="<%= p._id %>" 
+                         style="border: 2px solid #e0e0e0; border-radius: 16px; padding: 25px; transition: all 0.3s ease; position: relative; background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%); cursor: pointer;"
                          onclick="window.location.href='/demo/portfolio/<%= p._id %>'"
                          onmouseover="this.style.borderColor='#2196F3'; this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 30px rgba(0,0,0,0.15)'" 
                          onmouseout="this.style.borderColor='#e0e0e0'; this.style.transform='translateY(0)'; this.style.boxShadow='none'">
@@ -159,21 +219,21 @@
                                     </span>
                                 </div>
                             </div>
-                            <div style="background: #4CAF50; color: white; padding: 8px; border-radius: 50%; font-size: 1.2em;">
+                            <div style="background: #4CAF50; color: white; padding: 10px; border-radius: 50%; font-size: 1.3em;">
                                 📊
                             </div>
                         </div>
 
-                        <!-- Portfolio Stats Placeholder -->
+                        <!-- Portfolio Stats -->
                         <div style="background: #f8f9fa; padding: 20px; border-radius: 12px; margin-bottom: 20px;">
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div class="portfolio-stats-<%= p._id %>" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                                 <div style="text-align: center;">
                                     <div style="font-size: 0.85em; color: #666; margin-bottom: 5px;">Portfolio Value</div>
-                                    <div style="font-weight: 700; font-size: 1.3em; color: #4CAF50;">-</div>
+                                    <div style="font-weight: 700; font-size: 1.3em; color: #4CAF50;">Loading...</div>
                                 </div>
                                 <div style="text-align: center;">
                                     <div style="font-size: 0.85em; color: #666; margin-bottom: 5px;">Holdings</div>
-                                    <div style="font-weight: 700; font-size: 1.3em; color: #2c3e50;">0</div>
+                                    <div style="font-weight: 700; font-size: 1.3em; color: #2c3e50;">-</div>
                                 </div>
                             </div>
                         </div>
@@ -271,7 +331,9 @@
     <h3 style="margin: 0 0 25px 0; color: #2c3e50; text-align: center;">✨ Platform Features</h3>
     
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px;">
-        <div style="text-align: center; padding: 20px;">
+        <div style="text-align: center; padding: 20px; transition: transform 0.2s;"
+             onmouseover="this.style.transform='translateY(-5px)'" 
+             onmouseout="this.style.transform='translateY(0)'">
             <div style="background: linear-gradient(135deg, #4CAF50, #45a049); color: white; padding: 15px; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto; box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);">
                 <span style="font-size: 1.5em;">📊</span>
             </div>
@@ -279,7 +341,9 @@
             <p style="margin: 0; color: #666; line-height: 1.6;">Monitor your portfolio performance with live market data and instant updates.</p>
         </div>
 
-        <div style="text-align: center; padding: 20px;">
+        <div style="text-align: center; padding: 20px; transition: transform 0.2s;"
+             onmouseover="this.style.transform='translateY(-5px)'" 
+             onmouseout="this.style.transform='translateY(0)'">
             <div style="background: linear-gradient(135deg, #2196F3, #1976D2); color: white; padding: 15px; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto; box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);">
                 <span style="font-size: 1.5em;">🔔</span>
             </div>
@@ -287,7 +351,9 @@
             <p style="margin: 0; color: #666; line-height: 1.6;">Set price alerts and get notified when your stocks reach target levels.</p>
         </div>
 
-        <div style="text-align: center; padding: 20px;">
+        <div style="text-align: center; padding: 20px; transition: transform 0.2s;"
+             onmouseover="this.style.transform='translateY(-5px)'" 
+             onmouseout="this.style.transform='translateY(0)'">
             <div style="background: linear-gradient(135deg, #FF9800, #F57C00); color: white; padding: 15px; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto; box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);">
                 <span style="font-size: 1.5em;">📈</span>
             </div>
@@ -295,7 +361,9 @@
             <p style="margin: 0; color: #666; line-height: 1.6;">Detailed profit/loss analysis and performance metrics for informed decisions.</p>
         </div>
 
-        <div style="text-align: center; padding: 20px;">
+        <div style="text-align: center; padding: 20px; transition: transform 0.2s;"
+             onmouseover="this.style.transform='translateY(-5px)'" 
+             onmouseout="this.style.transform='translateY(0)'">
             <div style="background: linear-gradient(135deg, #9C27B0, #7B1FA2); color: white; padding: 15px; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto; box-shadow: 0 4px 15px rgba(156, 39, 176, 0.3);">
                 <span style="font-size: 1.5em;">🌍</span>
             </div>
@@ -324,39 +392,131 @@
 </style>
 
 <script>
+// Update current date and time
+function updateDateTime() {
+    const now = new Date();
+    const options = { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+    };
+    document.getElementById('currentDate').textContent = now.toLocaleDateString('en-US', options);
+    document.getElementById('currentTime').textContent = now.toLocaleTimeString('en-US');
+}
+
+updateDateTime();
+setInterval(updateDateTime, 1000);
+
+// Load market overview
+async function loadMarketOverview() {
+    try {
+        const response = await fetch('/api/stocks?limit=5&sortBy=volume&order=desc');
+        const data = await response.json();
+        
+        if (data.stocks && data.stocks.length > 0) {
+            const html = data.stocks.map(stock => {
+                const change = stock.currentPrice - stock.previousClose;
+                const changePercent = (change / stock.previousClose) * 100;
+                const isPositive = change >= 0;
+                
+                return `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s; cursor: pointer;"
+                         onclick="window.location.href='/stocks/stock/${stock.symbol}'"
+                         onmouseover="this.style.background='#f8f9fa'" 
+                         onmouseout="this.style.background='white'">
+                        <div style="flex: 1;">
+                            <div style="font-weight: 700; font-size: 1.1em; color: #2c3e50; margin-bottom: 3px;">${stock.symbol}</div>
+                            <div style="font-size: 0.85em; color: #666;">${stock.name.substring(0, 30)}${stock.name.length > 30 ? '...' : ''}</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-weight: 700; font-size: 1.2em; color: #2c3e50; margin-bottom: 3px;">${stock.currentPrice.toFixed(2)}</div>
+                            <div style="font-size: 0.9em; font-weight: 600; color: ${isPositive ? '#4CAF50' : '#f44336'};">
+                                ${isPositive ? '▲' : '▼'} ${Math.abs(change).toFixed(2)} (${isPositive ? '+' : ''}${changePercent.toFixed(2)}%)
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('marketOverview').innerHTML = html;
+        } else {
+            document.getElementById('marketOverview').innerHTML = `
+                <div style="text-align: center; padding: 40px; color: #666;">
+                    <div style="font-size: 2em; margin-bottom: 10px;">📊</div>
+                    <div>No market data available</div>
+                    <a href="/stocks/market" style="color: #2196F3; text-decoration: none; margin-top: 10px; display: inline-block;">
+                        Browse Stock Market →
+                    </a>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Error loading market overview:', error);
+        document.getElementById('marketOverview').innerHTML = `
+            <div style="text-align: center; padding: 40px; color: #666;">
+                <div style="font-size: 2em; margin-bottom: 10px;">⚠️</div>
+                <div>Failed to load market data</div>
+                <button onclick="loadMarketOverview()" style="margin-top: 15px; padding: 8px 16px; background: #2196F3; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                    Retry
+                </button>
+            </div>
+        `;
+    }
+}
+
+// Load portfolio summaries
+async function loadPortfolioSummaries() {
+    const portfolioCards = document.querySelectorAll('.portfolio-card');
+    let totalValue = 0;
+    
+    for (const card of portfolioCards) {
+        const portfolioId = card.dataset.portfolioId;
+        const statsContainer = document.querySelector(`.portfolio-stats-${portfolioId}`);
+        
+        try {
+            // This would normally fetch from your API
+            // For now, we'll show placeholder data
+            statsContainer.innerHTML = `
+                <div style="text-align: center;">
+                    <div style="font-size: 0.85em; color: #666; margin-bottom: 5px;">Portfolio Value</div>
+                    <div style="font-weight: 700; font-size: 1.3em; color: #4CAF50;">View Details</div>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 0.85em; color: #666; margin-bottom: 5px;">Holdings</div>
+                    <div style="font-weight: 700; font-size: 1.3em; color: #2c3e50;">Click to View</div>
+                </div>
+            `;
+        } catch (error) {
+            console.error(`Error loading portfolio ${portfolioId}:`, error);
+        }
+    }
+    
+    // Update total value
+    if (totalValue > 0) {
+        document.getElementById('totalValue').textContent = `${totalValue.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+    }
+}
+
+// Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
-    // Add smooth scrolling for any anchor links
+    loadMarketOverview();
+    loadPortfolioSummaries();
+    
+    // Refresh market data every 30 seconds
+    setInterval(loadMarketOverview, 30000);
+    
+    // Add smooth scrolling
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
             e.preventDefault();
-            document.querySelector(this.getAttribute('href')).scrollIntoView({
-                behavior: 'smooth'
-            });
-        });
-    });
-
-    // Add loading state for portfolio cards
-    const portfolioCards = document.querySelectorAll('[onclick*="portfolio"]');
-    portfolioCards.forEach(card => {
-        card.addEventListener('click', function() {
-            // Add a subtle loading indicator
-            const loadingDiv = document.createElement('div');
-            loadingDiv.style.cssText = `
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: rgba(255,255,255,0.8);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 1.2em;
-                border-radius: 16px;
-                z-index: 10;
-            `;
-            loadingDiv.innerHTML = '⏳ Loading...';
-            this.appendChild(loadingDiv);
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
         });
     });
 });

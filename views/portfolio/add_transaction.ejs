@@ -223,7 +223,143 @@
                     font-weight: 600;
                     transition: all 0.2s ease;
                     text-align: center;
+                    display: flex;
+                    align-items: center;
                 ">
                 Cancel
             </a>
         </div>
+    </form>
+</div>
+
+<style>
+#buyOption:hover, #sellOption:hover {
+    border-color: #2196F3;
+    background: linear-gradient(135deg, #e3f2fd 0%, #ffffff 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(33, 150, 243, 0.2);
+}
+
+#buyOption input:checked ~ div,
+#sellOption input:checked ~ div {
+    transform: scale(1.05);
+}
+
+#submitBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(76, 175, 80, 0.4);
+}
+
+#symbol:focus, #qty:focus, #price:focus {
+    border-color: #2196F3;
+    box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+    background: white;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('transactionForm');
+    const symbolInput = document.getElementById('symbol');
+    const qtyInput = document.getElementById('qty');
+    const priceInput = document.getElementById('price');
+    const typeInputs = document.querySelectorAll('input[name="type"]');
+    const summary = document.getElementById('transaction-summary');
+    
+    // Auto-uppercase symbol
+    symbolInput.addEventListener('input', function() {
+        this.value = this.value.toUpperCase();
+        updateSummary();
+    });
+    
+    // Update summary on any input change
+    qtyInput.addEventListener('input', updateSummary);
+    priceInput.addEventListener('input', updateSummary);
+    typeInputs.forEach(input => {
+        input.addEventListener('change', updateSummary);
+    });
+    
+    function updateSummary() {
+        const symbol = symbolInput.value;
+        const qty = parseFloat(qtyInput.value) || 0;
+        const price = parseFloat(priceInput.value) || 0;
+        const type = document.querySelector('input[name="type"]:checked');
+        
+        if (symbol && qty > 0 && price > 0 && type) {
+            summary.style.display = 'block';
+            
+            document.getElementById('summary-symbol').textContent = symbol;
+            document.getElementById('summary-type').textContent = type.value;
+            document.getElementById('summary-type').style.color = type.value === 'BUY' ? '#4CAF50' : '#f44336';
+            document.getElementById('summary-qty').textContent = qty.toLocaleString();
+            document.getElementById('summary-price').textContent = price.toFixed(2);
+            
+            const total = qty * price;
+            document.getElementById('summary-total').textContent = total.toFixed(2);
+        } else {
+            summary.style.display = 'none';
+        }
+    }
+    
+    // Form validation
+    form.addEventListener('submit', function(e) {
+        const symbol = symbolInput.value.trim();
+        const qty = parseFloat(qtyInput.value);
+        const price = parseFloat(priceInput.value);
+        const type = document.querySelector('input[name="type"]:checked');
+        
+        if (!symbol || symbol.length < 1) {
+            e.preventDefault();
+            alert('Please enter a valid stock symbol');
+            symbolInput.focus();
+            return false;
+        }
+        
+        if (!qty || qty <= 0) {
+            e.preventDefault();
+            alert('Please enter a valid quantity');
+            qtyInput.focus();
+            return false;
+        }
+        
+        if (!price || price <= 0) {
+            e.preventDefault();
+            alert('Please enter a valid price');
+            priceInput.focus();
+            return false;
+        }
+        
+        if (!type) {
+            e.preventDefault();
+            alert('Please select transaction type (BUY or SELL)');
+            return false;
+        }
+        
+        // Show loading state
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span style="margin-right: 8px;">⏳</span>Processing...';
+        submitBtn.style.opacity = '0.7';
+    });
+    
+    // Highlight selected option
+    typeInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            document.getElementById('buyOption').style.borderColor = '#e0e0e0';
+            document.getElementById('sellOption').style.borderColor = '#e0e0e0';
+            
+            if (this.value === 'BUY') {
+                document.getElementById('buyOption').style.borderColor = '#4CAF50';
+                document.getElementById('buyOption').style.background = 'linear-gradient(135deg, #e8f5e9 0%, #ffffff 100%)';
+                document.getElementById('sellOption').style.background = 'white';
+            } else {
+                document.getElementById('sellOption').style.borderColor = '#f44336';
+                document.getElementById('sellOption').style.background = 'linear-gradient(135deg, #ffebee 0%, #ffffff 100%)';
+                document.getElementById('buyOption').style.background = 'white';
+            }
+        });
+    });
+});
+</script>
+
+<%- include('../layouts/footer') %>

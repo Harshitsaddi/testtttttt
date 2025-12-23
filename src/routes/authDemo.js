@@ -1,3 +1,4 @@
+// src/routes/authDemo.js - ENHANCED VERSION
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
@@ -59,7 +60,12 @@ router.post('/signup', async (req, res) => {
         });
 
         req.session.userId = user._id;
-        res.redirect('/demo/dashboard');
+        req.session.save((err) => {
+            if (err) {
+                console.error('Session save error:', err);
+            }
+            res.redirect('/demo/dashboard');
+        });
     } catch (err) {
         console.error('Signup error:', err);
         res.render('auth/signup', { error: 'Something went wrong. Please try again.' });
@@ -91,7 +97,12 @@ router.post('/login', async (req, res) => {
         }
 
         req.session.userId = user._id;
-        res.redirect('/demo/dashboard');
+        req.session.save((err) => {
+            if (err) {
+                console.error('Session save error:', err);
+            }
+            res.redirect('/demo/dashboard');
+        });
     } catch (err) {
         console.error('Login error:', err);
         res.render('auth/login', { error: 'Something went wrong. Please try again.' });
@@ -108,20 +119,42 @@ router.get('/logout', requireLogin, (req, res) => {
     });
 });
 
-// Dashboard (after login)
+// Dashboard (after login) - ENHANCED
 router.get('/dashboard', requireLogin, async (req, res) => {
     try {
         const user = await User.findById(req.session.userId);
-        const portfolios = await Portfolio.find({ ownerId: req.session.userId });
+        if (!user) {
+            req.session.destroy();
+            return res.redirect('/demo/login');
+        }
+        
+        const portfolios = await Portfolio.find({ ownerId: req.session.userId }).sort({ createdAt: -1 });
+        
+        // Get portfolio summaries for dashboard
+        const portfolioSummaries = [];
+        for (const portfolio of portfolios) {
+            try {
+                const summary = await computePortfolioSummary(portfolio._id);
+                portfolioSummaries.push({
+                    portfolio,
+                    summary
+                });
+            } catch (err) {
+                console.error(`Error computing summary for portfolio ${portfolio._id}:`, err);
+            }
+        }
+        
         res.render('auth/dashboard', {
             portfolios,
-            user: user,
+            portfolioSummaries,
+            user,
             error: null
         });
     } catch (err) {
         console.error('Dashboard error:', err);
         res.render('auth/dashboard', {
             portfolios: [],
+            portfolioSummaries: [],
             user: null,
             error: 'Error loading dashboard'
         });
@@ -142,9 +175,13 @@ router.post('/portfolio/create', requireLogin, async (req, res) => {
             return res.render('portfolio/create', { error: 'Portfolio name is required' });
         }
 
+        if (name.length < 3) {
+            return res.render('portfolio/create', { error: 'Portfolio name must be at least 3 characters long' });
+        }
+
         const portfolio = new Portfolio({
             ownerId: req.session.userId,
-            name: name,
+            name: name.trim(),
             currency: currency || 'USD'
         });
 
@@ -256,12 +293,36 @@ router.post('/portfolio/:id/transaction/add', requireLogin, async (req, res) => 
             });
         }
 
+        if (!['BUY', 'SELL'].includes(type.toUpperCase())) {
+            return res.render('portfolio/add_transaction', {
+                portfolio,
+                error: 'Invalid transaction type'
+            });
+        }
+
+        const quantity = parseFloat(qty);
+        const priceValue = parseFloat(price);
+
+        if (isNaN(quantity) || quantity <= 0) {
+            return res.render('portfolio/add_transaction', {
+                portfolio,
+                error: 'Invalid quantity'
+            });
+        }
+
+        if (isNaN(priceValue) || priceValue <= 0) {
+            return res.render('portfolio/add_transaction', {
+                portfolio,
+                error: 'Invalid price'
+            });
+        }
+
         const transaction = new Transaction({
             portfolioId: req.params.id,
-            symbol: symbol.toUpperCase(),
-            qty: parseFloat(qty),
-            price: parseFloat(price),
-            type: type
+            symbol: symbol.toUpperCase().trim(),
+            qty: quantity,
+            price: priceValue,
+            type: type.toUpperCase()
         });
 
         await transaction.save();
@@ -273,6 +334,28 @@ router.post('/portfolio/:id/transaction/add', requireLogin, async (req, res) => 
             portfolio,
             error: 'Failed to add transaction'
         });
+    }
+});
+
+// Delete portfolio
+router.post('/portfolio/:id/delete', requireLogin, async (req, res) => {
+    try {
+        const portfolio = await Portfolio.findById(req.params.id);
+
+        if (!portfolio || String(portfolio.ownerId) !== String(req.session.userId)) {
+            return res.status(404).json({ error: 'Portfolio not found' });
+        }
+
+        // Delete all associated transactions
+        await Transaction.deleteMany({ portfolioId: req.params.id });
+
+        // Delete the portfolio
+        await Portfolio.findByIdAndDelete(req.params.id);
+
+        res.redirect('/demo/dashboard');
+    } catch (err) {
+        console.error('Delete portfolio error:', err);
+        res.status(500).json({ error: 'Failed to delete portfolio' });
     }
 });
 
